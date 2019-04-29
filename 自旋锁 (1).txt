@@ -1,6 +1,6 @@
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
+//П
 public class Main {
     //зда§Ыј
     AtomicReference<Thread> atomicReference = new AtomicReference<>();
