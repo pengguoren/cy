@@ -1,0 +1,20 @@
+public class Main {
+
+    public static void main(String[] args) {
+        Semaphore semaphore = new Semaphore(3);
+        for (int i=1;i<=7;i++){
+            final int tempInt=i;
+            new Thread(()->{
+                try {
+                    semaphore.acquire();
+                    System.out.println(Thread.currentThread().getName()+"第"+tempInt+"车抢到车位");
+                    TimeUnit.MILLISECONDS.sleep(300);
+                    System.out.println(Thread.currentThread().getName()+"第"+tempInt+"离开车位");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }finally {
+                    semaphore.release();
+                }
+            },String.valueOf(i)).start();
+        }
+    }
