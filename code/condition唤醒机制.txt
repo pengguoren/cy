@@ -1,0 +1,81 @@
+/**
+  * 循环打印 启动abc三个线程
+  *a打印1次b打印2次 c打印三次循环5次
+  *
+  */
+public class TestO {
+    private int number = 1;
+    private Lock  lock = new ReentrantLock();
+    private Condition c1 = lock.newCondition();
+    private Condition c2 = lock.newCondition();
+    private Condition c3 = lock.newCondition();
+    public  void sout(){
+        lock.lock();
+        try {
+            while (number!=1){
+                c1.await();
+            }
+            for (int i = 0; i <1 ; i++) {
+                System.out.println(Thread.currentThread().getName());
+            }
+            number = 2;
+            c2.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+    public  void sout1(){
+        lock.lock();
+        try {
+            while (number!=2){
+                c2.await();
+            }
+            for (int i = 0; i <2 ; i++) {
+                System.out.println(Thread.currentThread().getName());
+            }
+            number = 3;
+            c3.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+    public  void sout2(){
+        lock.lock();
+        try {
+            while (number!=3){
+                c3.await();
+            }
+            for (int i = 0; i <3 ; i++) {
+                System.out.println(Thread.currentThread().getName());
+            }
+            number = 1;
+            c1.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+    public static void main(String[] args) {
+        TestO testO = new TestO();
+        for (int i = 0; i < 5; i++) {
+            new Thread(()->{
+                testO.sout();
+            },"AAA").start();
+        }
+        for (int i = 0; i < 5; i++) {
+            new Thread(()->{
+                testO.sout1();
+            },"BBB").start();
+        }
+        for (int i = 0; i < 5; i++) {
+            new Thread(()->{
+                testO.sout2();
+            },"CCC").start();
+        }
+    }
+}
