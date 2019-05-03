@@ -1,0 +1,73 @@
+####################
+//代码
+public class CallableDemo {
+    public static void main(String[] args) {
+        MyThread myThread = new MyThread();
+        FutureTask<Integer> futureTask = new FutureTask<>(myThread);
+        new Thread(futureTask,"AA").start();
+        new Thread(futureTask,"BB").start();
+        int result=0;
+        try {
+            result= futureTask.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        int l = 100;
+        result = result+l;
+
+        System.out.println(Thread.currentThread().getName()+"结果"+result);
+    }
+}
+
+class MyThread implements Callable<Integer>{
+    @Override
+    public Integer call() throws Exception {
+        System.out.println(Thread.currentThread().getName()+"进来了");
+        return 1024;
+    }
+}
+
+
+
+
+
+//测试版本
+public class CallableDemo {
+    public static void main(String[] args) {
+        MyThread myThread = new MyThread();
+        FutureTask<Integer> futureTask = new FutureTask<>(myThread);
+        Integer result=0;
+        Integer result1=0;
+        try {
+            new Thread(futureTask,"AA").start();
+            result= futureTask.get();
+            System.out.println(Thread.currentThread().getName()+"结果"+result);
+            TimeUnit.MILLISECONDS.sleep(5000);
+            new Thread(futureTask,"BB").start();
+            result1= futureTask.get();
+            System.out.println(Thread.currentThread().getName()+"结果"+result1);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        int l = 100;
+        result = result+l;
+        System.out.println(Thread.currentThread().getName()+"结果"+result);
+    }
+}
+
+class MyThread implements Callable<Integer>{
+    @Override
+    public Integer call() throws Exception {
+        System.out.println(Thread.currentThread().getName()+"进来了");
+        if(Thread.currentThread().getName()=="AA"){
+            return 1024;
+        }else{
+            return 1025;
+        }
+    }
+}
