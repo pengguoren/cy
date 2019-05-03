@@ -1,0 +1,34 @@
+public class CasStampDemo {
+
+
+    public static void main(String[] args) {
+        AtomicStampedReference<Integer> atomicStampedReference = new AtomicStampedReference<>(100,1);
+
+        new Thread(()->{
+            int stamp = atomicStampedReference.getStamp();
+            System.out.println(Thread.currentThread().getName()+"第一次版本号"+stamp);
+            try {
+                TimeUnit.SECONDS.sleep(1L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            atomicStampedReference.compareAndSet(100,101,atomicStampedReference.getStamp(),atomicStampedReference.getStamp()+1);
+            System.out.println(Thread.currentThread().getName()+"当前版本号"+atomicStampedReference.getStamp());
+            atomicStampedReference.compareAndSet(101,100,atomicStampedReference.getStamp(),atomicStampedReference.getStamp()+1);
+            System.out.println(Thread.currentThread().getName()+"当前版本号"+atomicStampedReference.getStamp());
+        },"AA").start();
+        new Thread(()->{
+            int stamp = atomicStampedReference.getStamp();
+            System.out.println(Thread.currentThread().getName()+"第一次版本号"+stamp);
+            try {
+                TimeUnit.SECONDS.sleep(5L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            boolean b = atomicStampedReference.compareAndSet(100, 1024, stamp, stamp + 1);
+            System.out.println(Thread.currentThread().getName()+"当前最新实际版本号"+atomicStampedReference.getStamp()+"是否修改成功"+b);
+            System.out.println(Thread.currentThread().getName()+"当前最新值"+atomicStampedReference.getReference());
+
+        },"BB").start();
+    }
+}
