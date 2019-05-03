@@ -1,0 +1,34 @@
+class lockDead implements  Runnable{
+    private  String locka;
+    private  String lockb;
+
+    public lockDead(String locka, String lockb) {
+        this.locka = locka;
+        this.lockb = lockb;
+    }
+
+    @Override
+    public void run() {
+        synchronized (locka){
+            System.out.println(Thread.currentThread().getName()+"获得锁"+locka);
+            try {
+                TimeUnit.SECONDS.sleep(2L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            synchronized (lockb){
+                System.out.println(Thread.currentThread().getName()+"获得锁"+lockb);
+            }
+        }
+    }
+}
+
+public class DeadLockDemo {
+
+    public static void main(String[] args) {
+        String locka = "locka";
+        String lockb = "lockb";
+       new Thread(new lockDead(locka,lockb),"AA").start();
+        new Thread(new lockDead(lockb,locka),"BB").start();
+    }
+}
