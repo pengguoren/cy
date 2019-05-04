@@ -1,0 +1,42 @@
+public class AAA {
+    private static  String str3 = "world";
+    static {
+        System.out.println("1");
+    }
+    public static void main(String[] args) {
+        System.out.println(CCC.str);
+
+    }
+}
+class BBB{
+    public static  String str = "hello world";
+    static{
+        System.out.println("2");
+    }
+}
+class CCC extends  BBB{
+    public static  String str1 = "hello";
+    static{
+        System.out.println("3");
+    }
+
+}
+
+
+################################################################
+//常量在编译阶段会存入到调用这个常量方法所在的类的常量池中，
+//本质上，调用类并没有直接引用到定义常量的类，
+//因此不会触发定义常量的类的初始化
+
+public class DDD {
+    public static void main(String[] args) {
+        System.out.println(EEE.str);
+    }
+}
+class  EEE{
+    public  static  final   String str = "hello";
+
+    static{
+        System.out.println(1);
+    }
+}

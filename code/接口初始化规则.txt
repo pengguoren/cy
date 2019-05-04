@@ -1,0 +1,87 @@
+接口初始化规则
+在我们初始化一个类的时候，会先初始化它的父类，但是对于接口不是这样的，在初始化一个类时，并不会先初始化它所实现的接口，我们看下面的程序
+
+public class MyTest5 {
+    public static void main(String[] args) {
+        System.out.println(MyChild5.b);
+    }
+}
+
+interface MyParent5{
+    public static int a  = new Random().nextInt(3);
+    public static Thread thread = new Thread(){
+        //每个C的实例创建时都会执行一次
+        {
+            System.out.println("MyParent5 invoked");
+        }
+    };
+}
+
+
+class MyChild5 implements MyParent5{
+    public static int b = 5;
+}
+运行程序，输出：
+
+5
+可以看到MyChild5实现的接口MyParent5没有初始化
+
+初始化一个接口时，并不要求其父接口都完成了初始化
+
+public class MyTest5 {
+    public static void main(String[] args) {
+        System.out.println(MyParent5.thread);
+    }
+}
+
+
+interface MyGradpa{
+    public static int a = new Random().nextInt();
+    public static Thread thread = new Thread(){
+        {
+            System.out.println("MyGradpa invoked");
+        }
+    };
+}
+
+interface MyParent5 extends MyGradpa{
+    public static Thread thread = new Thread(){
+        {
+            System.out.println("MyParent5 invoked");
+        }
+    };
+}
+运行程序，输出：
+
+MyParent5 invoked
+Thread[Thread-0,5,main]
+但是不代表一定不初始化父接口，在真正使用到父接口的时候（如引用接口中所定义的常量时），才会初始化
+
+public class MyTest5 {
+    public static void main(String[] args) {
+        System.out.println(MyParent5.thread);
+    }
+}
+
+interface MyGradpa{
+    public static Thread threadGradpa = new Thread(){
+        {
+            System.out.println("MyGradpa invoked");
+        }
+    };
+}
+
+interface MyParent5 extends MyGradpa{
+    public static Thread thread = new Thread(){
+        {
+            System.out.println("MyParent5 invoked");
+            System.out.println(threadGradpa);
+        }
+    };
+}
+运行程序，输出：
+
+MyParent5 invoked
+MyGradpa invoked
+Thread[Thread-1,5,main]
+Thread[Thread-0,5,main]
