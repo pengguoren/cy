@@ -1,3 +1,5 @@
+
+###################################################33
 public class AAA {
     private static  String str3 = "world";
     static {
@@ -38,5 +40,56 @@ class  EEE{
 
     static{
         System.out.println(1);
+    }
+}
+
+
+##################################################################
+public class MyTest6 {
+
+    public static void main(String[] args) {
+        System.out.println("==============");
+        Singleton single= Singleton.getInstance();
+        System.out.println(Singleton.i);
+        System.out.println(Singleton.k);
+        Singleton single2= new Singleton();
+        System.out.println(Singleton.i);
+        System.out.println(Singleton.k);
+    }
+}
+
+/**
+ * 调用的时候才会加载Singleton字节码文件
+ * 先为静态分配内存空间，分配默认的初始值,第三步才是初始化根据上下文环境，从上到下依次初始化。给静态变量赋值。
+ * 类的静态变量分配空间和默认赋初值是在第二步准备阶段完成的，给静态变量主动赋初值是第三步了，执行顺序都是从上到下的。
+ */
+class Singleton{
+    public static  int i;
+
+    private  static  Singleton singleton = new Singleton();
+    Singleton(){
+        i++;
+        k++;
+    }
+    public static  int k = 0;
+    public static Singleton getInstance(){
+        return singleton;
+    }
+
+}
+
+################################################
+
+/**
+ * 加载MyClass1类的时候静态代码块没有执行
+ */
+class MyClass1 {
+    static {//静态块  
+        System.out.println("static block ");
+    }
+}
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("hello word: " + MyClass1.class);
     }
 }
