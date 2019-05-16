@@ -1,0 +1,43 @@
+import java.util.ArrayList;
+import java.util.List;
+/**
+ * -XX:+PrintGCDetails -Xms10m -Xmx10m -XX:MaxDirectMemorySize=5m 
+ * GC overhead limit exceeded
+ * GC回收低于2/100堆内存，98/100已被占用，导致不停GC而抛出异常
+ */
+public class GCTest {
+    public static void main(String[] args) {
+      int i =0;
+      List<String> list = new ArrayList<>();
+        try {
+            while(true){
+                list.add(String.valueOf(++i).intern());
+            }
+        } catch (Throwable e) {
+            System.out.println("=================="+i);
+            e.printStackTrace();
+            throw e;
+        }
+    }
+}
+
+
+
+public class GCTest {
+    /**
+     * 直接内存溢出
+     * Direct buffer memory
+     * @param args
+     */
+    public static void main(String[] args) {
+        System.out.println("配置的maxDirectMemory:"+(sun.misc.VM.maxDirectMemory())/((double)1024/1024)+"MB");
+        try {
+            Thread.sleep(3);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(6*1024*1024);
+    }
+
+
+
