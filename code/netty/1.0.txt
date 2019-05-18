@@ -1,0 +1,116 @@
+package com.school.netty.firstexample;
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+public class TestServer {
+    public static void main(String[] args) throws Exception {
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).
+                    childHandler(new TestServerInitializer());
+            ChannelFuture channelFuture = serverBootstrap.bind(8899).sync();
+            channelFuture.channel().closeFuture().sync();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+    }
+}
+
+
+#####################################################
+package com.school.netty.firstexample;
+
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.HttpServerCodec;
+
+public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
+    @Override
+    protected void initChannel(SocketChannel ch) throws Exception {
+        ChannelPipeline pipeline = ch.pipeline();
+        pipeline.addLast("httpServerCodec",new HttpServerCodec());
+        pipeline.addLast("testHttpServerhandler",new TestHttpServerHandler());
+
+    }
+
+}
+
+
+####################################################
+
+
+package com.school.netty.firstexample;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
+
+import java.net.URI;
+
+public class TestHttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
+        System.out.println(msg.getClass());
+        System.out.println(ctx.channel().remoteAddress());
+        Thread.sleep(8);
+        if(msg instanceof HttpRequest){
+            HttpRequest httpRequest = (HttpRequest) msg;
+            System.out.println(httpRequest.method().name());
+            URI uri = new URI(httpRequest.uri());
+            if("/favicon.ico".equals(uri.getPath())){
+                System.out.println("«Î«Ûfavicon.ico");
+                return;
+            }
+            ByteBuf content = Unpooled.copiedBuffer("hello world", CharsetUtil.UTF_8);
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,content);
+            response.headers().set(HttpHeaderNames.CONTENT_TYPE,"text/plain");
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH,content.readableBytes());
+            ctx.writeAndFlush(response);
+            ctx.channel().close();
+        }
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel registered");
+        super.channelRegistered(ctx);
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel unregistered");
+        super.channelUnregistered(ctx);
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel active");
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("channel inactive");
+        super.channelInactive(ctx);
+    }
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("handler added");
+        super.handlerAdded(ctx);
+    }
+}
+
+
+
