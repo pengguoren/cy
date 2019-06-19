@@ -1,0 +1,141 @@
+#######################################################
+1.volatile是Java虚拟机提供的轻量级的同步机制
+a.保证可见性
+b.不保证原子性
+c.禁止指令重排
+ 
+
+
+##########################################33
+枚举根节点做可达性分析（根路径搜索）
+tracing gc 追踪 
+-XX:+TraceClassLoading,用于跟踪类的加载信息并打印出来
+-XX:+traceClassUnloading，用于跟踪类的卸载信息并打印出来
+常量在编译阶段会存入到调用这个常量方法所在的类的常量池中，本质上，调用类并没有直接引用到定义常量的类，因此不会触发定义常量的类的初始化
+
+
+
+
+##########################################
+jconsole
+jvisualvm
+system.exit()虚拟机退出。
+打包jar包 jar cvf jar名  /xxx/AAA.class文件路径
+java -Djava.ext.dirs=./ AAA类名  指定扩展类加载器的加载路径 并运行AAA类
+jps -l 获取Java进程的编号
+jinfo -flag jvm参数  java进程编号 -》查看jvm参数是否开启等信息
+jinfo -flags 进程编号  查询所有jvm参数信息
+第二种，查看参数盘点家底
+java -XX:+PrintFlagsInitial 初始的值
+-XX:+PrintFlagsFinal  （可在此修改JVM参数）修改后的值
+-XX:+PrintCommandLIneFlags -version   最后一个参数是gc垃圾回收器 打印最简单版的jvm初始化参数
+日常jvm默认配置参数-Xms128m -Xmx4096m -Xss1024k -XX:+MetaspaceSize=512m -XX:+printCommandLineFlags -XX:+PrintGCDetails 
+         		-XX:+UseSerialGC
+
+
+more xxx.Java  显示java代码在命令行窗口上
+
+
+
+#####################################
+GC垃圾回收器
+GC 串行收集器 （古老 稳定 会有较长时间停顿）
+-XX:+UseSerialGC 新生代、老年代串行回收，新生代复制算法、老年代标记-压缩算法
+并行收集器 ParNew (多核时性能比较好) Serial收集器的新生代并行版本 GC日志可以看到ParNew
+-XX:+UseParNewGC 新生代并行 老年代串行 新生代复制算法 需要多核支持 只影响新生代GC
+-XX:ParallelGCThreads限制线程数量
+
+Parallel收集器 新生代复制 老年代标记压缩 更加关注吞吐量
+-XX:+UseParallelGC 老年代串行
+-XX:+UseParallelOldGC 老年代并行
+
+
+GC 停顿时间
+-XX:MaxGCPauseMills 最大停顿时间 单位毫秒 尽量保证回收时间不超过设定值
+-XX:GCTimeRatio 0-100取值范围，垃圾收集时间占总时间的比值，默认99，即最大允许时间为1%
+这两个参数不能同时起作用
+
+
+
+
+##################################
+jvm参数
+-XX:-printGCDetails  是否打印GC收集细节
+-XX:+UseSerialGC 是否使用串行垃圾回收器 串行垃圾回收器
+-XX:+UseParallelGC 是否使用串行垃圾回收器 并行垃圾回收器  jdk8默认垃圾回收器
+-XX:MetaSpaceSize=xxxm  元空间 不在虚拟机中，而是使用本地内存
+-XX:MaxMetaSpaceSize=xxxm  元空间 不在虚拟机中，而是使用本地内存
+-XX:MaxTenuringThreshold=15 多少次进入老年代 如果设置为0，则年轻代对象不经过survivor区，直接进入老年代。对于老年代多的应用，可以提高效率
+	jdk8只能在0~15之间
+-XX:InintialHeapSize=xxxm 初始化堆大小 等价于-Xms
+-XX:MaxHeapSize=xxxm  最大堆内存大小  等价于-Xmx
+-XX:ThreadStackSize 设置单个线程的大小，一般默认512K~1024K 等价于-Xss
+-XX:NewSize=xxxm   新生代大小 等价于-Xmn
+-XX:OldSize=xxxm  老年代大小
+-XX:MaxNewSize=xxxm   最大新生代大小
+-XX:MaxDirectMemorySize=xxm 设置直接内存大小。比如电脑16G的1/4改为xxm
+-XX:SurvivorRatio 设置新生代中eden和S0/S1空间的比例
+	默认-XX:SurvivorRatio=8,Eden:S0:S1=8:1:1
+	假如-XX:SurvivorRatio=4,Eden:S0:S1=4:1:1
+	SurvivorRatio值就是设置eden区的比例占多少，S0/S1相同
+-XX:NewRatio 配置年轻代与老年代在堆结构中的占比
+	默认-XX:NewRatio=2新生代占1，老年代占2，年轻代占整个堆的1/3
+	假如-XX:NewRatio=4新生代占1，老年代占4，年轻代占整个堆的1/5
+	NewRatio值就是设置老年代的占比，剩下的1给新生代
+
+
+
+
+#############################################
+强引用：Reference 内存够不够用，都不回收
+软引用：SoftReference 内存够用不回收，内存不够用就回收
+弱引用：WeakReference 内存够不够用都回收
+虚引用：PhantomReference
+
+
+
+
+
+#####################################
+OOM
+StackOverflowError:栈空间异常溢出
+OutOfMemoryError：java heap space 堆空间异常溢出
+		:  GC overhead limit exceeded  GC回收低于2/100堆内存，98/100已被占用，导致不停GC抛出异常
+		: Direct buffer memory 直接内存挂掉
+		: unable to create new native thread 线程数多于了系统的一个应用默认的线程数量
+		------"配置的maxDirectMemory:"+(sun.misc.VM.maxDirectMemory())/((double)1024/1024)+"MB"
+		: MetaSpace 元空间溢出
+
+
+######################################
+垃圾收集器
+serial 串行
+parallel 并行   java8 默认垃圾回收器 UseParallelGC   查看垃圾回收器：-XX:+PrintCommandLineFlags -version
+CMS 并发  -XX:+UseConcMarkSweepGC
+G1 : -XX:+UseG1GC
+Java11 ZGC
+
+
+应用服务器变慢了：
+linux————
+整机：top uptime 查询cpu使用情况和系统负载均衡相加除以三
+cpu: vmstat - n 2 3 每两秒采样一次共计采样三次
+      ：查看所有cpu核信息----mpstat -p ALL 2 每两秒采样一次
+       ：每个进程使用cpu的用量分解信息----pidstat -u 1 -p 进程编号
+内存：free  free -g 四舍五入版  free -m 查询多少M
+       ：查看额外 pidstat -p 进程号 -r 采样间隔秒数
+硬盘：df  df -h 人类看得懂的方式
+磁盘i/o ：iostat -xdk 2 3 
+	: 查看额外的 pidstat  -d 采样间隔秒数-p 进程号
+
+
+#############################################
+助记符：
+ldc表示将int，float或是String类型的常量值从常量池中推送至栈顶
+bipush表示将单字节（-128~127）的常量值推送至栈顶
+sipush表示将一个短整型的常量值（-32768~32767）推送至栈顶
+iconst_-1~5表示将int类型的数字（-1~5）推送至栈顶
+
+
+
+GitHub
